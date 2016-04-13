@@ -2,7 +2,7 @@
 
 #include "ofConstants.h"
 
-#ifdef TARGET_OSX
+#if defined(TARGET_OSX) || defined(TARGET_LINUX)
 
 #include "ofxUVC.h"
 #include "ofQTKitGrabber.h"

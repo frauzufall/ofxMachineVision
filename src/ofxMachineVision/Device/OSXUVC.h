@@ -2,7 +2,7 @@
 
 #include "ofConstants.h"
 
-#ifdef TARGET_OSX
+#if defined(TARGET_OSX) || defined(TARGET_LINUX)
 
 #include "ofxUVC.h"
 #include "ofQTKitGrabber.h"
@@ -21,7 +21,7 @@ namespace ofxMachineVision {
 		class OSXUVC : public Updating {
 		public:
 			OSXUVC(int width = 1920, int height = 1080, float desiredFramerate = 30);
-			Specification open(int deviceID) override;
+                        Specification open(int deviceID);
 			bool startCapture() override;
 			void stopCapture() override;
 			void close() override;

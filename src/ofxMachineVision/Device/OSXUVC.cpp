@@ -1,9 +1,11 @@
 #include "OSXUVC.h"
 
-#ifdef TARGET_OSX
+#if defined(TARGET_OSX) || defined(TARGET_LINUX)
 
+#ifdef TARGET_OSX
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+#endif
 
 namespace ofxMachineVision {
 	namespace Device {
