@@ -2,8 +2,8 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	
-    ofEnableSmoothing();
+
+	ofEnableSmoothing();
 	ofBackground(50);
 
 	ofRectangle roi(0, 512, 2048, 1024);
@@ -24,16 +24,16 @@ void testApp::setup(){
 	this->toggleProgress = false;
 
 	gui.setHeight(400);
-	
+
 	gui.addLabel("ofxMachineVision", OFX_UI_FONT_LARGE);
 	gui.addLabel("Camcorder example", OFX_UI_FONT_MEDIUM);
-	
+
 	gui.addSpacer();
 
 	gui.addLabel("Device");
 	//gui.addButton("Open camera", &this->bangOpen);
 	this->guiDeviceStateLabel = gui.addLabel("Device state", "...", OFX_UI_FONT_SMALL);
-	
+
 	gui.addSpacer();
 
 	gui.addToggle("Record", &this->toggleRecord);
@@ -62,7 +62,7 @@ void testApp::update(){
 		if (this->toggleRecord) {
 			this->recorder.start();
 		} else {
-			this->recorder.stop(); 
+			this->recorder.stop();
 		}
 	}
 
@@ -86,7 +86,7 @@ void testApp::update(){
 			it = this->recorder.upper_bound(this->selectionTimestamp);
 		}
 	}
-	
+
 	if (this->bangSavePipets) {
 		ofFile file;
 		file.open("pipets.txt", ofFile::WriteOnly, false);
@@ -107,7 +107,7 @@ void testApp::update(){
 	}
 
 	if (this->toggleSave) {
-		auto & pixels = this->recorder[this->selectionTimestamp].getPixelsRef();
+		auto & pixels = this->recorder[this->selectionTimestamp].getPixels();
 		ofSaveImage(pixels, ofToString(this->selectionTimestamp) + ".png");
 	}
 
@@ -126,16 +126,16 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::loadSelection() {
 	auto & frame = this->recorder[this->selectionTimestamp];
-	this->selectionView.allocate(frame.getPixelsRef());
-	this->selectionView.loadData(frame.getPixelsRef());
-	
+	this->selectionView.allocate(frame.getPixels());
+	this->selectionView.loadData(frame.getPixels());
+
 	auto next = recorder.upper_bound(this->selectionTimestamp);
 	if (next == recorder.end()) {
 		this->selectionDuration = 0;
 	} else {
 		this->selectionDuration = next->first - this->selectionTimestamp;
 	}
-	
+
 	this->guiFrameTimestamp->setLabel("Timestamp : " + ofToString(selectionTimestamp) + "us");
 	this->guiFrameDuration->setLabel(ofToString(selectionDuration) + "us / " + ofToString(float(1e6) / float(selectionDuration)) + "fps");
 }
@@ -168,7 +168,7 @@ void testApp::draw(){
 		position /= timeWindow;
 		position *= ofGetWidth();
 		ofLine(position, ofGetHeight() - 150, position, ofGetHeight() - 50);
-	}	
+	}
 	ofPopStyle();
 	//-----
 
@@ -181,7 +181,7 @@ void testApp::draw(){
 		x -= timeStart;
 		x /= timeWindow;
 		x *= ofGetWidth();
-		
+
 		float width = selectionDuration;
 		width *= ofGetWidth() / (float) timeWindow;
 
@@ -274,8 +274,8 @@ void testApp::draw(){
 }
 
 //--------------------------------------------------------------
-unsigned char testApp::getValue(Microseconds timestamp, ofVec2f position) { 
-	const auto &pixels = this->recorder[timestamp].getPixelsRef();
+unsigned char testApp::getValue(Microseconds timestamp, ofVec2f position) {
+	const auto &pixels = this->recorder[timestamp].getPixels();
 	position *= ofVec2f(pixels.getWidth(), pixels.getHeight());
 	return pixels[pixels.getPixelIndex(position.x, position.y)];
 }
@@ -343,7 +343,6 @@ void testApp::gotMessage(ofMessage msg){
 }
 
 //--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
+void testApp::dragEvent(ofDragInfo dragInfo){
 
 }
-	

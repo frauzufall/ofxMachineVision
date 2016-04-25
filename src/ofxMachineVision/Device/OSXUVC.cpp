@@ -1,9 +1,11 @@
 #include "OSXUVC.h"
 
-#ifdef TARGET_OSX
+#if defined(TARGET_OSX) || defined(TARGET_LINUX)
 
+#ifdef TARGET_OSX
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+#endif
 
 namespace ofxMachineVision {
 	namespace Device {
@@ -14,80 +16,90 @@ namespace ofxMachineVision {
 			this->desiredFramerate = desiredFramerate;
 			this->frame = shared_ptr<Frame>(new Frame());
 		}
-		
+
+		string OSXUVC::getTypeName() const {
+			return "Webcam";
+		}
+
 		//-----------
-		Specification OSXUVC::open(int deviceID) {
-			this->deviceID = deviceID;
+		//Specification OSXUVC::open(int deviceID) {
+		Specification OSXUVC::open(shared_ptr<Base::InitialisationSettings> initialisationSettings) {
+
+			auto settings = this->getTypedSettings<InitialisationSettings>(initialisationSettings);
+
+			this->deviceID = settings->deviceID;
 			this->device.setDeviceID(this->deviceID);
 			this->device.setup(this->width, this->height);
 			this->device.setDesiredFrameRate(this->desiredFramerate);
-			
-			this->controller.useCamera(0x046d, 0x082d, deviceID);
-			this->controller.setAutoExposure(false);
-			this->controller.setAutoFocus(false);
-			
+
+//			this->controller.useCamera(0x046d, 0x082d, deviceID);
+//			this->controller.setAutoExposure(false);
+//			this->controller.setAutoFocus(false);
+
 			this->setSharpness(0.0f);
 			this->resetTimestamp();
-			
-			const auto deviceList = this->device.listVideoDevices();
+
+			const auto deviceList = this->device.listDevices();
+			string deviceName = "";
 			if (deviceList.size() == 0) {
 				OFXMV_FATAL << "No video devices found";
+			}else {
+				deviceName = deviceList[deviceID % deviceList.size()].deviceName;
 			}
-			const string deviceName = deviceList.empty() ? "" : deviceList[deviceID % deviceList.size()];
-			
+
 			Specification specification(width, height, "UVC", deviceName);
-			
+
 			specification.addFeature(Feature::Feature_DeviceID);
 			specification.addFeature(Feature::Feature_Exposure);
 			specification.addFeature(Feature::Feature_FreeRun);
 			specification.addFeature(Feature::Feature_Gain);
 			specification.addFeature(Feature::Feature_Focus);
 			specification.addFeature(Feature::Feature_Sharpness);
-			
+
 			specification.addPixelMode(PixelMode::Pixel_RGB8);
-			
+
 			this->resetTimestamp();
-			
+
 			OFXMV_WARNING << "OSXUVCDevice implements Exposure as a normalised range 0...1000. I.e. ignoring the unit us.";
 			return specification;
 		}
-		
+
 		//-----------
 		bool OSXUVC::startCapture() {
 			OFXMV_WARNING << "startCapture is not used with OSXUVCDevice";
 			return true;
 		}
-		
+
 		//-----------
 		void OSXUVC::stopCapture() {
 			OFXMV_WARNING << "stopCapture is not supported by VideoInputDevice";
 		}
-		
+
 		//----------
 		void OSXUVC::close() {
 			this->device.close();
 		}
-		
+
 		//---------
 		void OSXUVC::setExposure(Microseconds exposure) {
-			this->controller.setExposure((float) exposure / 1000.0f);
+//			this->controller.setExposure((float) exposure / 1000.0f);
 		}
-		
+
 		//---------
 		void OSXUVC::setGain(float percent) {
-			this->controller.setGain(percent);
+//			this->controller.setGain(percent);
 		}
-		
+
 		//---------
 		void OSXUVC::setFocus(float percent) {
-			this->controller.setAbsoluteFocus(percent);
+//			this->controller.setAbsoluteFocus(percent);
 		}
-		
+
 		//---------
 		void OSXUVC::setSharpness(float percent) {
-			this->controller.setSharpness(percent);
+//			this->controller.setSharpness(percent);
 		}
-		
+
 		//---------
 		void OSXUVC::updateIsFrameNew() {
 			this->device.update();
@@ -95,24 +107,24 @@ namespace ofxMachineVision {
 				this->frame->lockForWriting();
 				const auto now = chrono::high_resolution_clock::now();
 				const auto elapsedTime = chrono::duration_cast<chrono::duration<double>>(now - this->timerStart);
-				
+
 				this->frame->setTimestamp(elapsedTime.count() * 1e6);
 				this->frame->setFrameIndex(this->frameIndex);
 				this->frame->getPixels() = this->device.getPixels();
 				this->frame->unlock();
 			}
 		}
-		
+
 		//---------
 		bool OSXUVC::isFrameNew() {
 			return this->device.isFrameNew();
 		}
-		
+
 		//---------
 		shared_ptr<Frame> OSXUVC::getFrame() {
 			return this->frame;
 		}
-		
+
 		//---------
 		void OSXUVC::resetTimestamp() {
 			this->timerStart = chrono::high_resolution_clock::now();

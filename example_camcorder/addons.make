@@ -1,0 +1,8 @@
+ofxUVC
+ofxXmlSettings
+ofxUI
+ofxSingleton
+ofxPlugin
+ofxLiquidEvent
+ofxXimea
+ofxMachineVision

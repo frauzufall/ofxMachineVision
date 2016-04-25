@@ -4,7 +4,7 @@
 #include "./VideoInput.h"
 #include "./OSXUVC.h"
 
-OFXSINGLETON_DEFINE(ofxMachineVision::Device::FactoryRegister);
+//OFXSINGLETON_DEFINE(ofxMachineVision::Device::FactoryRegister);
 
 namespace ofxMachineVision {
 	namespace Device {
